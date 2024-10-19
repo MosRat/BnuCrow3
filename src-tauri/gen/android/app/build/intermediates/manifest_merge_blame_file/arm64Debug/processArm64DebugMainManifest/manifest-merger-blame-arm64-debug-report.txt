@@ -1,0 +1,153 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.bnucrow3.app"
+4    android:versionCode="1001"
+5    android:versionName="0.1.1" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="24" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:3:5-67
+11-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:3:22-64
+12
+13    <!-- AndroidTV support -->
+14    <uses-feature
+14-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:6:5-87
+15        android:name="android.software.leanback"
+15-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:6:19-59
+16        android:required="false" />
+16-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:6:60-84
+17
+18    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+18-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-81
+18-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:22-78
+19    <uses-permission android:name="android.permission.WAKE_LOCK" />
+19-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-68
+19-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:22-65
+20    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+20-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:5-77
+20-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:9:22-74
+21
+22    <permission
+22-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:22:5-24:47
+23        android:name="com.bnucrow3.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.bnucrow3.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:26:22-94
+27
+28    <application
+29        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+29-->[androidx.core:core:1.9.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\ab23c46ddc799c235fcd5819cb67a0b1\transformed\core-1.9.0\AndroidManifest.xml:28:18-86
+30        android:debuggable="true"
+31        android:extractNativeLibs="false"
+32        android:icon="@mipmap/ic_launcher"
+32-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:9:9-43
+33        android:label="@string/app_name"
+33-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:10:9-41
+34        android:theme="@style/Theme.bnu_crow3"
+34-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:11:9-47
+35        android:usesCleartextTraffic="true" >
+35-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:12:9-63
+36        <activity
+36-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:13:9-25:20
+37            android:name="com.bnucrow3.app.MainActivity"
+37-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:17:13-41
+38            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+38-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:14:13-129
+39            android:exported="true"
+39-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:18:13-36
+40            android:label="@string/main_activity_title"
+40-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:16:13-56
+41            android:launchMode="singleTask" >
+41-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:15:13-44
+42            <intent-filter>
+42-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:19:13-24:29
+43                <action android:name="android.intent.action.MAIN" />
+43-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:20:17-69
+43-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:20:25-66
+44
+45                <category android:name="android.intent.category.LAUNCHER" />
+45-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:21:17-77
+45-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:21:27-74
+46                <!-- AndroidTV support -->
+47                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+47-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:23:17-86
+47-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:23:27-83
+48            </intent-filter>
+49        </activity>
+50
+51        <provider
+52            android:name="androidx.core.content.FileProvider"
+52-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:28:11-60
+53            android:authorities="com.bnucrow3.app.fileprovider"
+53-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:29:11-62
+54            android:exported="false"
+54-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:30:11-35
+55            android:grantUriPermissions="true" >
+55-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:31:11-45
+56            <meta-data
+56-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:32:11-34:50
+57                android:name="android.support.FILE_PROVIDER_PATHS"
+57-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:33:13-63
+58                android:resource="@xml/file_paths" />
+58-->E:\WorkSpace\RustProjects\BnuCrow3\src-tauri\gen\android\app\src\main\AndroidManifest.xml:34:13-47
+59        </provider>
+60
+61        <receiver android:name="app.tauri.notification.TimedNotificationPublisher" />
+61-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:9-86
+61-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:12:19-83
+62        <receiver android:name="app.tauri.notification.NotificationDismissReceiver" />
+62-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:9-87
+62-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:19-84
+63        <receiver
+63-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:14:9-23:20
+64            android:name="app.tauri.notification.LocalNotificationRestoreReceiver"
+64-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:15:13-83
+65            android:directBootAware="true"
+65-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:16:13-43
+66            android:exported="false" >
+66-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:17:13-37
+67            <intent-filter>
+67-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:18:13-22:29
+68                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+68-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:19:17-86
+68-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:19:25-83
+69                <action android:name="android.intent.action.BOOT_COMPLETED" />
+69-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:17-79
+69-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:20:25-76
+70                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+70-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:21:17-82
+70-->[:tauri-plugin-notification] E:\GlobalScoopApps\persist\rustup-msvc\.cargo\registry\src\mirrors.tuna.tsinghua.edu.cn-2eab394af869c8a2\tauri-plugin-notification-2.0.1\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:21:25-79
+71            </intent-filter>
+72        </receiver>
+73
+74        <provider
+74-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+75            android:name="androidx.startup.InitializationProvider"
+75-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:25:13-67
+76            android:authorities="com.bnucrow3.app.androidx-startup"
+76-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:26:13-68
+77            android:exported="false" >
+77-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:27:13-37
+78            <meta-data
+78-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+79                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+79-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:30:17-75
+80                android:value="androidx.startup" />
+80-->[androidx.emoji2:emoji2:1.2.0] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\f433c1f3f1340650c48537d79ddaa15e\transformed\emoji2-1.2.0\AndroidManifest.xml:31:17-49
+81            <meta-data
+81-->[androidx.lifecycle:lifecycle-process:2.4.1] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\591e1b08a2ab25a1eb05cd11ca6e648f\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:31:13-33:52
+82                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+82-->[androidx.lifecycle:lifecycle-process:2.4.1] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\591e1b08a2ab25a1eb05cd11ca6e648f\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:32:17-78
+83                android:value="androidx.startup" />
+83-->[androidx.lifecycle:lifecycle-process:2.4.1] E:\GlobalScoopApps\apps\gradle\current\.gradle\caches\8.9\transforms\591e1b08a2ab25a1eb05cd11ca6e648f\transformed\lifecycle-process-2.4.1\AndroidManifest.xml:33:17-49
+84        </provider>
+85    </application>
+86
+87</manifest>
