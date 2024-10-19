@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tauri_v2_vue_template_lib::run()
+    bnu_crow_lib::run()
 }
