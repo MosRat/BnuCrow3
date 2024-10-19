@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+/src-tauri/gen
+
+tauri.settings.gradle
+keystore.properties

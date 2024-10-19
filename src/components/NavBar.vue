@@ -10,26 +10,38 @@
   -->
 
 <script setup lang="ts">
-import {useRouter} from 'vue-router';
-import {ref} from "vue";
+import {useRoute, useRouter} from 'vue-router';
+import {ref,computed} from "vue";
+
+import {
+  HomeOutlined,
+  MenuOutlined,
+} from "@ant-design/icons-vue";
+
 
 interface View {
-  title:string,
-  path:string,
-  icon:string,
+  title: string,
+  path: string,
+  icon: any,
 }
 
 const router = useRouter();
+const route = useRoute();
 const views = ref<View[]>([
+  // {
+  //   title: "登录",
+  //   path: "/login",
+  //   icon: HomeOutlined
+  // },
   {
-    title:"课表",
-    path:"/home",
-    icon:""
+    title: "课表",
+    path: "/classtable",
+    icon: HomeOutlined
   },
   {
-    title:"功能",
-    path:"/home",
-    icon:""
+    title: "功能",
+    path: "/actlist",
+    icon: MenuOutlined
   }
 ])
 const navigateTo = (path: string) => {
@@ -37,14 +49,20 @@ const navigateTo = (path: string) => {
   router.push({path, replace: true});
 };
 
+const current = computed(()=>
+  route.path
+)
+
 
 </script>
 
 <template>
-  <div class="bar">
-    <div v-for="(view,i) in views" :key="i" @click="navigateTo(view.path)">
-      <div class="icon">{{view.icon}}</div>
-      <div class="title">{{view.title}}</div>
+  <div class="bar blur">
+    <div v-for="(view,i) in views" :key="i" @click="navigateTo(view.path)" :class="['bar-item',{'current-item':current===view.path}]" :style="{
+      backgroundColor: current===view.path ? 'rgba(137,137,137,0.2)' : 'rgba(255,255,255,0)'
+    }">
+      <component :is="view.icon"></component>
+      <div class="title">{{ view.title }}</div>
     </div>
   </div>
 </template>
@@ -58,6 +76,23 @@ const navigateTo = (path: string) => {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 -1px rgba(198, 197, 197, 0.5);
+  box-shadow: 0 -2px rgba(198, 197, 197, 0.5);
+  height: 7.5vh;
+
+  //background-color: #cacaca;
+}
+
+.bar-item{
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em 1.5em 0;
+  color: #696969;
+  border-radius: 0.25em;
+  cursor: pointer;
+  transition: background-color 0.5s ease
+}
+
+.current-item{
+  color: #252525;
 }
 </style>
