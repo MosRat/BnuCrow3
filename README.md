@@ -2,6 +2,7 @@
 <div align="center">
 <h1 style="font-size: 40px"> BNU Crow 3 </h1>
 
+
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0.0-blue?logo=tauri)]()
 [![Vue.js](https://img.shields.io/badge/vue.js-v3-green?logo=vue.js)](https://github.com/vuejs/vue-next)
@@ -13,7 +14,6 @@
 </div>
 
 Welcome to 北师小鸦3, a dedicated campus life assistant app designed for students of Beijing Normal University (BNU). This app builds upon the legacy of its predecessor, [北师小鸦2](https://github.com/BNU-Crow/BNU-Xiaoya), to provide an enhanced and seamless experience for BNU students.
-
 
 
 ## Features
