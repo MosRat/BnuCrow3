@@ -1,7 +1,6 @@
 
 <div align="center">
-<h1 style="font-size: 40px"> BNU Crow 3 </h1>
-
+<h1 > BNU Crow 3 </h1>
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0.0-blue?logo=tauri)]()
