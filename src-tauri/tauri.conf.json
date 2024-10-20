@@ -2,6 +2,7 @@
   "productName": "bnu-crow3",
   "version": "0.1.1",
   "identifier": "com.bnucrow3.app",
+  "$schema": "gen/schemas/config.schema.json",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://192.168.137.1:1420",

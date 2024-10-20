@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import NavBar from "@cp/NavBar.vue";
-import Refresher from "@cp/Refresher.vue";
+// import Refresher from "@cp/Refresher.vue";
 import {useRoute} from 'vue-router'
 import Error from "@view/Error.vue";
 import {ref, watch} from 'vue'
@@ -36,7 +36,7 @@ watch(
       </transition>
     </div>
     <NavBar v-if="!route.meta.hideComponents as boolean"/>
-    <Refresher/>
+<!--    <Refresher/>-->
   </div>
 </template>
 
