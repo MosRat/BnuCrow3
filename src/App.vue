@@ -1,3 +1,14 @@
+<!--
+  - *Copyright (c) 2024. MosRat
+  - All rights reserved.
+  -
+  - Project: BnuCrow3
+  - File Name: App.vue
+  - Created Date: 2024/10/30 00:25
+  - Author: MosRat (work@whl.moe)
+  - Description:
+  -->
+
 <script setup lang="ts">
 import NavBar from "@cp/NavBar.vue";
 // import Refresher from "@cp/Refresher.vue";
@@ -21,7 +32,6 @@ watch(
       }
     }
 )
-
 
 </script>
 

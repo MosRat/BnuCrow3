@@ -186,7 +186,7 @@ fn get_box_binary(i: u8) -> &'static str {
 }
 
 fn s_box_permute(expand_byte: &[u8]) -> Vec<u8> {
-    let mut s_box_byte =  Vec::with_capacity(32);
+    let mut s_box_byte = Vec::with_capacity(32);
     let s_boxes = [S1, S2, S3, S4, S5, S6, S7, S8];
 
     for m in 0..8 {
@@ -277,7 +277,7 @@ fn bt64_to_hex(byte_data: &[u8]) -> String {
     for i in 0..16 {
         let mut bt = String::new();
         for j in 0..4 {
-            bt+= &byte_data[i * 4 + j].to_string();
+            bt += &byte_data[i * 4 + j].to_string();
         }
         hex.push(bt4_to_hex(&bt));
     }
@@ -343,8 +343,19 @@ pub fn b64_encode(data: &str) -> String {
     BASE64_STANDARD.encode(data)
 }
 
-pub fn fast_enc(data: &str, first_key: &str) ->String{
-    b64_encode(&str_enc(data,first_key,"",""))
+pub fn md5(s: &str) -> String {
+    let digest = md5::compute(s);
+    format!("{:x}", digest)
+}
+
+pub fn fast_enc(data: &str, first_key: &str) -> String {
+    b64_encode(&str_enc(data, first_key, "", ""))
+}
+
+pub fn enc_params(deskey: &str, nowtime: &str, params: &str) -> String {
+    let token = md5(&(md5(params) + &md5(nowtime)));
+    let p = fast_enc(params, deskey);
+    format!("params={p}&token={token}&timestamp={nowtime}")
 }
 
 #[cfg(test)]
@@ -352,9 +363,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_enc(){
+    fn test_enc() {
         let start = std::time::Instant::now();
-        let s = b64_encode(&str_enc("202111150036","bnu","",""));
-        println!("{s} {:?}",start.elapsed());
+        let s = b64_encode(&str_enc("202111150036", "bnu", "", ""));
+        println!("{s} {:?}", start.elapsed());
+    }
+    #[test]
+    fn test_param() {
+        let des = "59284172985747211583399";
+        let now_time = "2024-10-25 19:57:52";
+        let params = "xktype=2&xn=2024&xq=0&xh=202161286408&nj=2021&zydm=BQ108&kcdm=2310178582&kclb1=05&kclb2=A1&kclb3=01&khfs=01&skbjdm=2310178582-01&skbzdm=&xf=1.0&is_checkTime=1&kknj=&kkzydm=&txt_skbjdm=&xk_points=0&is_buy_book=0&is_cx=0&is_yxtj=1&menucode_current=JW130403&kcfw=zxbnj";
+        let res = "params=QzIwNEVEQTQ2RUVGODFBNzFEN0E5M0M1MjBGNEM0RTM3NkUwNDhGOTUxQzQ3RkJBOEVGRDFFNTMyMjQ0MkUyNDE4ODNDNkU0ODMyOTA4RTU1OTJERjY1ODQzODJBNEY4QkFGMDFENDZEMkI1NTI4OEM3RjU0OTA5QTU3Mjk3Nzc1OUVCMDYzMTNEMjBDMjJFNDcyMkFBREM4QUVCRkMyQ0JBRjAxRDQ2RDJCNTUyODhGMjgxMjY4MzlFQ0E2M0EzMkMyMzMyQUQ0QkQ4MDg4QkRCNzI1OTQ0QzdBQjFDNjI0NEUxM0JCNTEwOEZBMEJFQkMyNUE4MTIxMDI1MTNCMkREM0QzQjNDRThDRTBCRTQ4NTg1MkMwMjRFNzI2QTg0QUI2RjgyRDAxNjk4OUMyQzI2Qjg5MTgxOTFBRUE3OTBFMDI3QjQ5NjJBMURFNzBDNERENEE1MTY3MjAxQUQ1MEFENjc3MzlEMzFBRThCMzA4NTE3NEU0RUQ3RUU1OEFFNTg5MzM0QkY2NENGODM5REQ2MzhDQjhDN0Q0RTdGNTU1ODkzMzRCRjY0Q0Y4MzlEMEJBOTJFMEY1ODZGNkM5NUEwRDA1NUY4RjJBRkE1NEM2RThCQkRDMkYzRjE3QzhFN0Y1MEY3REYwMDY0MjRCNUFGQTBGMEFCQTJENUI1NTM3MUE1MUUzNEY4MEIwQjUyRTc1MjlFNzhDMkM1NjI0ODU1RTcyODcwNDQ2OTg0OUNGOTg1RTlGMUNGQjZFRjEwOUZDQjUyRTFEOTA3MzJBOTk3MkNGQzY0RTc5RDIzM0E0RjcwQTQ5RTQ0M0RFMjM0MDE3MTlERDY2NTk0REU3RDhERUIzQzVBMDQ2MkIzRERDMENGNzcxNUM2OUE4NDY1NjhBN0FDQzU2Q0FDODAyM0QxRkI4NzRDMjU3Q0NFRDdCNEIwNThGNzQzNDkzNDY3N0ZBQTRGNzNEQTY2NjcyRjc4RUYwNDgzQThGMUJCM0IyOTQ2OTJCM0UxMTBBMjFFNzlFREJEMzFFQzU0Qjg5RjEwNTI5MkNBNEM2Q0FEQUMyOTIzMDI4NDJGRDk5RDlDODJENkU0MjA4RkM4NDk4MDlDNDZGNkNENEJDRDFCMkFCOTU0NThFNzY4RDQwNEVDOUM0NkY2Q0Q0QkNEMUIyQTYzNUQ3OEEyOTgyOEVDMDhDQzdDRDg4RjQ0QzBFQzUxMkExRjNCMjEwNDNDMjk1MkMyMzREQ0IxOUZBNkNBOTAxOEFGQ0E0QkRFRTIwNEY3Q0VGNDYzQjFCRUJDMkIwMTRDNjY4OTA5QkZGQUIwNUE2RDk4MUU2NjhFOERDREVGQzM1NTYxNzRFNUI1QTMzODkxQUE0RTUwNkY1MTBCNDNDRjg4MTBCNTE2MDNDMkI1Mzc1NEJEOTA2MjYxMDI4RQ==&token=a189d29995cfe6517db41d46b8b10667&timestamp=2024-10-25 19:57:52";
+
+        eprintln!("{}", enc_params(des, now_time, params));
+        assert_eq!(res,enc_params(des, now_time, params))
     }
 }

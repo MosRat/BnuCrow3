@@ -15,7 +15,7 @@ crate-type = ["lib", "cdylib", "staticlib"]
 tauri-build = { version = "2.0.0-rc", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.1", features = ["protocol-asset"] }
+tauri = { version = "2.0.6", features = ["protocol-asset"] }
 tauri-plugin-shell = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -34,8 +34,15 @@ chrono = "0.4.38"
 serde-xml-rs = "0.5"
 jni = "0.21.0"
 time = "0.3.36"
+md5 = "0.7.0"
+serde_urlencoded = "0.7.1"
+url = "2.5.2"
+dddd_ocr = { git = "https://github.com/MosRat/dddd_ocr_rs" }
+image = { version = "0.25.4", features = ["gif", "png", ], default-features = false }
+
 
 [profile.dev]
+lto = false
 incremental = true # Compile your binary in smaller steps.
 
 [profile.release]

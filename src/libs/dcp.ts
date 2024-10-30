@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2024. MosRat
+ * All rights reserved.
+ *
+ * Project: BnuCrow3
+ * File Name: dcp.ts
+ * Created Date: 2024/10/30 00:24
+ * Author: MosRat (work@whl.moe)
+ * Description:
+ */
+
 // import {defineStore} from 'pinia'
 import {convertFileSrc, invoke} from "@tauri-apps/api/core";
 import {store} from "@lib/tauri-store";

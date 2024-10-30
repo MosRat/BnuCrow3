@@ -1,5 +1,0 @@
-{"raw_cookie":"CASTGC=TGT-202111150036-263465-L5YqHHRgEDToSfosLKb11eAyYr6WL7KsRwASJDIaqme2bggnnn-cas; Path=/cas/","path":["/cas/",true],"domain":{"HostOnly":"cas.bnu.edu.cn"},"expires":"SessionEnd"}
-{"raw_cookie":"Language=zh_CN; Path=/; Max-Age=604800; Expires=Sat, 26 Oct 2024 09:54:55 GMT","path":["/",true],"domain":{"HostOnly":"cas.bnu.edu.cn"},"expires":{"AtUtc":"2024-10-26T09:54:35Z"}}
-{"raw_cookie":"JSESSIONID=7916529FF9C7ABA5ACB5D8D278470147; HttpOnly; Path=/cas","path":["/cas",true],"domain":{"HostOnly":"cas.bnu.edu.cn"},"expires":"SessionEnd"}
-{"raw_cookie":"JSESSIONID=90AA1EB95B895AC866C5B53AC2134585; HttpOnly; Path=/dcp","path":["/dcp",true],"domain":{"HostOnly":"one.bnu.edu.cn"},"expires":"SessionEnd"}
-{"raw_cookie":"JSESSIONID=5F7944CBA7950A2F9D901D4132DDC694; HttpOnly; Path=/","path":["/",true],"domain":{"HostOnly":"one.bnu.edu.cn"},"expires":"SessionEnd"}

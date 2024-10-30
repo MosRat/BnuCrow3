@@ -15,7 +15,7 @@
     "@tauri-apps/plugin-http": "~2",
     "@tauri-apps/plugin-notification": "~2",
     "@tauri-apps/plugin-shell": "^2.0.0",
-    "@tauri-apps/plugin-store": "~2",
+    "@tauri-apps/plugin-store": "^2.1.0",
     "@types/node": "^22.4.0",
     "pinia": "^2.2.2",
     "vue": "^3.3.4",

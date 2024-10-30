@@ -4,9 +4,9 @@
   "identifier": "com.bnucrow3.app",
   "$schema": "gen/schemas/config.schema.json",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://192.168.137.1:1420",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {

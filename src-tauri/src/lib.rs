@@ -10,6 +10,7 @@ mod command;
 
 use once_cell::sync::OnceCell;
 use tauri::{AppHandle, Manager};
+use dddd_ocr::Rec;
 use tokio::sync::Mutex;
 use crate::dcp::DcpSession;
 use crate::command::{
@@ -26,7 +27,7 @@ use crate::command::{
 };
 
 pub static APP: OnceCell<AppHandle> = OnceCell::new();
-// pub static DCP:OnceCell<DcpSession> = OnceCell::new();
+pub static REC:OnceCell<Rec> = OnceCell::new();
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -41,6 +42,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             APP.get_or_init(|| app.handle().clone());
+            REC.get_or_init(|| Rec::from_embed().unwrap());
             app.get_webview_window("main").unwrap().with_webview(|webview| {
                 #[cfg(target_os = "android")]
                 {

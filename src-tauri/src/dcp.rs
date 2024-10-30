@@ -1,11 +1,12 @@
 #![allow(dead_code, unused_imports)]
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::fs::File;
-use std::io::Write;
+use std::io::{Cursor, Write};
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::process::exit;
-
+use std::str::FromStr;
 use tauri_plugin_http::reqwest::{redirect::Policy, header, ClientBuilder, Client, Proxy};
 use anyhow::{anyhow, Result};
 use chrono::Local;
@@ -14,10 +15,13 @@ use serde_json::{json, Value};
 use serde::{Deserialize, Serialize};
 use serde_xml_rs::from_str;
 use tauri::Manager;
+use url::form_urlencoded;
+use image::{DynamicImage, GenericImageView};
+use dddd_ocr::Rec;
 
 use super::session::Session;
-use super::encrypt::str_enc;
-use super::APP;
+use super::encrypt::{enc_params, str_enc};
+use super::{APP, REC};
 
 
 const CHECK_ENTRY: &str = "https://webvpn.bnu.edu.cn/login";
@@ -35,6 +39,9 @@ const INTER_PROXY: &str = "https://onevpn.bnu.edu.cn/https/77726476706e697374686
 const INNER_CARD: &str = "https://card.bnu.edu.cn";
 const INTER_CARD: &str = "https://onevpn.bnu.edu.cn/https/77726476706e69737468656265737421f3f6539869326645300d8db9d6562d";
 
+const INNER_TY: &str = "https://tycg.bnu.edu.cn";
+const INTER_TY: &str = "https://webvpn.bnu.edu.cn/https/57787a7876706e323032336b657940246c01011fb2019d5be449fe2ddfb88b";
+
 const WX_CAS: &str = "https://weixin.bnu.edu.cn/login.php";
 
 const DCP_HOST: &str = "one.bnu.edu.cn";
@@ -44,10 +51,121 @@ const AAM_HOST: &str = "zyfw.bnu.edu.cn";
 const AAM_PUB_HOST: &str = "zyfw.prsc.bnu.edu.cn";
 
 const CARD_HOST: &str = "card.bnu.edu.cn";
+const TY_HOST: &str = "tycg.bnu.edu.cn";
+
+pub enum TyList {
+    YMQ,
+    PPQ,
+    SWYQ,
+    YYG,
+}
+
+impl FromStr for TyList {
+    type Err = anyhow::Error;
+
+    fn from_str(input: &str) -> Result<TyList, Self::Err> {
+        match input.to_lowercase().as_str() {
+            "ymq" => Ok(TyList::YMQ),
+            "ppq" => Ok(TyList::PPQ),
+            "swyq" => Ok(TyList::SWYQ),
+            "yyg" => Ok(TyList::YYG),
+            _ => Err(anyhow!("Invalid input for parse TyList: {}", input)),
+        }
+    }
+}
+
+impl TyList {
+    const TIME_KEYS: [&'static str; 14] = [
+        "08:00-09:00",
+        "09:00-10:00",
+        "10:00-11:00",
+        "11:00-12:00",
+        "12:00-13:00",
+        "13:00-14:00",
+        "14:00-15:00",
+        "15:00-16:00",
+        "16:00-17:00",
+        "17:00-18:00",
+        "18:00-19:00",
+        "19:00-20:00",
+        "20:00-21:00",
+        "21:00-22:00"
+    ];
+    pub fn get_cgid(&self) -> String {
+        match self {
+            TyList::YMQ => "6fdb8db0-5b72-4ee9-baba-c1bef6db6b0b",
+            TyList::PPQ => "d855c916-26a8-47cc-a6b4-d02ba0c1dd20",
+            TyList::SWYQ => "136d9258-31f6-490b-ac15-d1ec5a386a3b",
+            TyList::YYG => "917a6cc5-1f9d-4b63-bce7-6fa1afbd72a3",
+        }.to_string()
+    }
+
+    pub fn get_query(&self) -> String {
+        match self {
+            TyList::YMQ => "dataOne=%7B%22cgid%22%3A%226fdb8db0-5b72-4ee9-baba-c1bef6db6b0b%22%2C%22xmlx%22%3A%225%22%2C%22yyrq%22%3A%222024-10-26%22%2C%22xydm%22%3A%2211%22%7D",
+            TyList::PPQ => "dataOne=%7B%22cgid%22%3A%22d855c916-26a8-47cc-a6b4-d02ba0c1dd20%22%2C%22xmlx%22%3A%224%22%2C%22yyrq%22%3A%222024-10-26%22%2C%22xydm%22%3A%2211%22%7D",
+            TyList::SWYQ => "dataOne=%7B%22cgid%22%3A%22136d9258-31f6-490b-ac15-d1ec5a386a3b%22%2C%22xmlx%22%3A%229%22%2C%22yyrq%22%3A%222024-10-26%22%2C%22xydm%22%3A%2211%22%7D",
+            TyList::YYG => "dataOne=%7B%22cgid%22%3A%22917a6cc5-1f9d-4b63-bce7-6fa1afbd72a3%22%2C%22xmlx%22%3A%227%22%2C%22yyrq%22%3A%222024-10-26%22%2C%22xydm%22%3A%2211%22%7D",
+        }.to_string()
+    }
+
+    pub fn get_data(&self, playground: &str, time: &str) -> Result<String> {
+        match self.get_details().get(playground) {
+            Some(v) => match v.get("sjklist").unwrap().get(time) {
+                None => { Err(anyhow!("No match time!")) }
+                Some(d) => {
+                    Ok(d.to_string())
+                }
+            }
+            None => Err(anyhow!("No match playground!"))
+        }
+    }
+
+    pub fn get_details(&self) -> Value {
+        match self {
+            TyList::YMQ => serde_json::from_str(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../data/ymq.json"))).unwrap(),
+            TyList::PPQ => serde_json::from_str(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../data/ppq.json"))).unwrap(),
+            TyList::SWYQ => serde_json::from_str(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../data/wqc.json"))).unwrap(),
+            TyList::YYG => serde_json::from_str(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../data/yyg.json"))).unwrap(),
+        }
+    }
+
+    pub fn get_keys(&self) -> Value {
+        match self {
+            TyList::YMQ => json!(["羽1", "羽2", "羽3", "羽4", "羽5", "羽6", "羽7", "羽8", "二层东", "二层西", "小综合1", "小综合2", "小综合3", "小综合4"]),
+            TyList::PPQ => json!(["乒1", "乒2", "乒3", "乒4", "乒5", "乒6", "乒7", "乒8", "乒9", "乒10", "乒11"]),
+            TyList::SWYQ => json!(["网1", "网2", "网3", "网4", "网5"]),
+            TyList::YYG => json!([]),
+        }
+    }
+
+    pub fn parse_request(&self, data: &str, code: &str, datetime: &str) -> String {
+        Self::serialize(&match self {
+            TyList::YMQ => format!(r#"{{"yycds": [{data}], "cgid": "6fdb8db0-5b72-4ee9-baba-c1bef6db6b0b", "xmlx": "5", "zje": 5, "yyrq": "{datetime}", "txrs": [], "zffs": "1", "authcode": "{code}"}}"#),
+            TyList::PPQ => format!(r#"{{"yycds": [{data}], "cgid": "d855c916-26a8-47cc-a6b4-d02ba0c1dd20", "xmlx": "4", "zje": 5, "yyrq": "{datetime}", "txrs": [], "zffs": "1", "authcode": "{code}"}}"#),
+            TyList::SWYQ => format!(r#"{{"yycds": [{data}], "cgid": "136d9258-31f6-490b-ac15-d1ec5a386a3b", "xmlx": "9", "zje": 5, "yyrq": "{datetime}", "txrs": [], "zffs": "1", "authcode": "{code}"}}"#),
+            TyList::YYG => format!("{data}"),
+        })
+    }
+
+    fn serialize(s: &str) -> String {
+        form_urlencoded::Serializer::new(String::new())
+            .append_pair("dataOne", s)
+            .finish()
+            .replace("+", "")
+    }
+}
+
+impl Display for TyList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.get_cgid())
+    }
+}
 
 pub async fn judge_network() -> Result<bool> {
     Ok(ClientBuilder::new()
         .redirect(Policy::none())
+        .danger_accept_invalid_certs(true)
         // .proxy(Proxy::all("http://192.168.137.1:10809").unwrap())
         .build()?
         .get(CHECK_ENTRY)
@@ -111,7 +229,7 @@ pub fn parse_class_table(html_data: &str) -> Result<Value> {
 
     let mut schedule_by_week: HashMap<u32, Vec<Value>> = HashMap::new();
 
-    let re = Regex::new(r"(\d+)(?:-(\d+))?周(?:\((单|双)\))? (\S)\[(\d+)-(\d+)\] (\S+)\((\d+)\)").unwrap();
+    let re = Regex::new(r"(\d+)(?:-(\d+))?周(?:\(([单双])\))? (\S)\[(\d+)-(\d+)] (\S+)\((\d+)\)").unwrap();
 
     let day_map = vec!["一", "二", "三", "四", "五", "六", "日"];
 
@@ -250,6 +368,56 @@ struct Score {
     remarks: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Default)]
+struct ElectiveCourseForm {
+    xktype: String,      // 选课类型
+    xn: String,          // 学年
+    xq: String,          // 学期
+    xh: String,          // 学号
+    nj: String,          // 年级
+    zydm: String,        // 专业代码
+    kcdm: String,        // 课程代码
+    kclb1: String,       // 课程类别1
+    kclb2: String,       // 课程类别2
+    kclb3: String,       // 课程类别3
+    khfs: String,        // 考核方式
+    skbjdm: String,      // 上课班级代码
+    skbzdm: String,      // 上课班组代码
+    xf: String,          // 学分
+    is_check_Time: String, // 是否检查时间
+    kknj: String,        // 开课年级
+    kkzydm: String,      // 开课专业代码
+    kcfw: String,        // 课程范围
+}
+
+impl ElectiveCourseForm {
+    fn new(mut data: serde_json::Value) -> Self {
+        // 检查并添加缺失字段
+        let keys = [
+            "xktype", "xn", "xq", "xh", "nj", "zydm", "kcdm", "kclb1", "kclb2", "kclb3",
+            "khfs", "skbjdm", "skbzdm", "xf", "is_check_Time", "kknj", "kkzydm", "kcfw"
+        ];
+
+        for key in &keys {
+            if !data.get(key).is_some() {
+                data[key] = Value::String("".to_string());
+            }
+        }
+        let mut form: ElectiveCourseForm = serde_json::from_value(data).unwrap();
+
+        if form.kcfw.is_empty() {
+            form.kcfw = "zxbnj".to_string();
+        }
+
+        form
+    }
+
+    fn encode(&self) -> Result<String> {
+        eprintln!("{self:#?}");
+        Ok(serde_urlencoded::to_string(&self)?)
+    }
+}
+
 
 #[derive(Debug, Clone)]
 pub struct DcpSession {
@@ -280,20 +448,24 @@ impl DcpSession {
         //     .await?;
         let mut err: Option<String> = None;
         let inner = true;
-        // eprintln!("login cookies: {}", std::fs::read_to_string(APP
-        //     .get()
-        //     .unwrap()
-        //     .path()
-        //     .app_data_dir()?
-        //     .join("cookies.json")).unwrap_or("no cookie".to_string()));
+        // eprintln!("login cookies: {}", std::fs::read_to_string( APP
+        //                 .get()
+        //                 .map(|app| {
+        //                     app.path()
+        //                         .app_data_dir()
+        //                         .unwrap()
+        //                         .join("cookies.json")
+        //                 }).unwrap_or("cookies.json".parse().unwrap())
+        // ).unwrap_or("no cookie".to_string()));
         let session = Session::try_new(
             APP
                 .get()
-                .unwrap()
-                .path()
-                .app_data_dir()?
-                .join("cookies.json")
-            // "cookies.json".parse().unwrap()
+                .map(|app| {
+                    app.path()
+                        .app_data_dir()
+                        .unwrap()
+                        .join("cookies.json")
+                }).unwrap_or("cookies.json".parse().unwrap())
         )?;
         let mut dcp = DcpSession { session, inner, info: Some(HashMap::new()) };
         Ok(dcp)
@@ -580,7 +752,8 @@ impl DcpSession {
                 "yxb", // 院学部 人工智能学院
                 "zymc", // 专业名称 人工智能
                 "yhxh", // 学号 20221115xxxx
-                "xb" // 性别 男
+                "xb", // 性别 男
+                "xh" //内部学号 2021xxxxxxxx
             ];
             for field in fields {
                 let re = regex::Regex::new(&format!(r"<{0}>(.*?)</{0}>", field))?;
@@ -784,6 +957,117 @@ impl DcpSession {
         Ok(res)
     }
 
+    pub async fn get_aam_token_key(&self, menucode: &str) -> Result<String> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36".parse().unwrap());
+        headers.insert("Host", (if self.inner { AAM_HOST } else { VPN_HOST }).parse().unwrap());
+        headers.insert("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8".parse().unwrap());
+        headers.insert("Referer", ((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() + "/student/wsxk.zx10139.jsp").parse().unwrap());
+        headers.insert("X-Requested-With", "XMLHttpRequest".parse().unwrap());
+
+        let res = self.session.post((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() +
+            "/frame/menus/js/SetTokenkey.jsp")
+            .headers(headers)
+            .body(format!("menucode={menucode}"))
+            .send().await?
+            .text().await?;
+        Ok(res)
+    }
+
+    pub async fn get_aam_encrypt_key(&self) -> Result<(String, String)> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36".parse().unwrap());
+        headers.insert("Host", (if self.inner { AAM_HOST } else { VPN_HOST }).parse().unwrap());
+        // headers.insert("Referer", ((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() + "/student/wsxk.zx10139.jsp").parse().unwrap());
+
+        let res = self.session.get((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() +
+            "/custom/js/SetKingoEncypt.jsp")
+            .headers(headers)
+            .send().await?
+            .text().await?;
+
+        let key_re = Regex::new(r"(?s)_deskey = '(.*?)'.*_nowtime = '(.*?)'").unwrap();
+        if let Some(captures) = key_re.captures(&res) {
+            Ok((
+                captures.get(1).unwrap().as_str().to_string(),
+                captures.get(2).unwrap().as_str().to_string()
+            ))
+        } else {
+            Err(anyhow!("cant get des key!"))
+        }
+    }
+
+
+    pub async fn select_course_zx(&self, course: Value) -> Result<String> {
+        let c = course.clone();
+        let token = self.get_aam_token_key("wsxk.zx10139.jsp").await?;
+        let (key, nowtime) = self.get_aam_encrypt_key().await?;
+        let p = ElectiveCourseForm::new(course).encode()? + "&xk_points=0&is_buy_book=0&is_cx=0&is_yxtj=1&menucode_current=JW130403";
+        let params = enc_params(&key, &nowtime, &p);
+        eprintln!("{c}\n{token}\n{key}\n{nowtime}\n{p}\n{params}");
+
+        let mut headers = header::HeaderMap::new();
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36".parse().unwrap());
+        headers.insert("Host", (if self.inner { AAM_HOST } else { VPN_HOST }).parse().unwrap());
+        headers.insert("Accept-Language", "zh,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7".parse().unwrap());
+        headers.insert("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8".parse().unwrap());
+        headers.insert("Referer", ((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() + &format!("/student/report/wsxk.zx_promt.jsp?{}", "params=")).parse().unwrap());
+        headers.insert("Accept", "text/plain, */*; q=0.01".parse().unwrap());
+        headers.insert("X-Requested-With", "XMLHttpRequest".parse().unwrap());
+        headers.insert("DNT", "1".parse().unwrap());
+        // headers.insert("Accept-Encoding", "gzip, deflate".parse().unwrap());
+        headers.insert("Origin", (if self.inner { INNER_AAM } else { INTER_AAM }).to_string().parse().unwrap());
+        headers.insert("Proxy-Connection", "keep-alive".parse().unwrap());
+
+        let res = self.session.post((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() +
+            "/jw/common/saveElectiveCourseZx.action")
+            .headers(headers)
+            .body(format!("{params}&timestamp={nowtime}&tokens={token}"))
+            //             .body(r#"params=MDAyOTk2MkFCNDQzMUVGRTBGMDMwNzMzRUMzMURGQTkyQTk5NDBFODExMUNEMjgwMDcyQTcwNkNCOEVCQzg2M0U5MjVERUY0OUFGRDYzODRBQ0IzNDI5NzIyM0VBMDc4MDVFQzY3NjJDMzBERDcwRUI3RjdFQzJFRjQzOERENzM2RkE5RjM0RkNGMUI4MDBCQUQyMUE5RTFDNjEyQUU3MTA1RUM2NzYyQzMwREQ3MEVEQkM0NTNCN0Q2NkU4QTEwMjFDRjhCODlDMUJBMkFBRkUzN0ZCOEJENUVEQ0RGQTk2QjMyNzBEQURDMzlDREQxNzFCNDkzMzRDRUVBRjUyMzhCRDg0NkRFOURDMjgzRUVBRkYyOUZBRTM1REVGRjU2NDFENzAxQzM3Nzc2MDk2NTFDMzE4RThDQUQyMDcxRjU4NkFDOEUzQkMyQTJCMDA1QjA2MTA4OTBFNUUzMDRFRkZERjJDODhGRkQ1QjE3Q0JFODlDMkZFRjk4NTAyOThDNjIzOUJFMDQ0RjZDNkYzQjg3MUQ0RDI5RDZFQUQ1MzE2MjM5QkUwNDRGNkM2RjNCRjM5RTBGQkY3MDA5N0RCNDRBOEFEODlCOTJDQTI0OUI2MDY1REQ0MjkyRjJFMTAwMURCMzk2Q0M2QzRGNTMwNTdFM0E4QTNFQUIyNzFCNjkyQ0QxMkFDRDZDQjRFMTJGMDJCRDdFMkMzQUQ1OEVEQUE4REU1NUY4QUE5M0M1RkIwODgyRjBGQ0JDMkFDRjIzMzhBOUVBQjhBNUJENzBBQ0UxREE4QkJEMDhEM0MxMkRCMTEzMEUxQzVGODZDQzdENEEyM0I3M0RGOTNBMjc0OTkyN0U1M0Q2NjA3NDkzOEQxQUI0QkY0QkI1OEE1RTNERUU5MTczMkQ4MEZGN0FBMDQ5QTcyRDU2RTMwRUNBRERBQzZDODAxQTJENDU4QkJENjU3NDc3QkUyOTBEQzk0Mjk5QkE4OTJBQTQwNEM5M0JDODc1QjU0N0NDNDJDNTkwOTY2NjUxRjVCMDc2QkM3MUE5MUE4MURDREZFMTEyNzhDMzY3M0E2RDEzMDFEREY2REEzREM5ODNGQjE3QUIyM0E3MzJBRkY5ODUzNUEyNUUyODEzNzNBQjM5RUQ1RjMwQTczMkFGRjk4NTM1QTI1RTYzMzBCMkVGRjAzRkZFNzZBMTRCRTg1NjQ3MUQzQTRFNTYwRDcxMjBCNkNDQTVDNkM0NkEyQjE2OTdCMUNFMjQyMjI4RUI5NzBGQ0VDQjU5QzE2RTk0MDI5MzBFNTRFOTVCODdGMjY5NDRFMjJGOUEzRTZDRDE1Nzk3NDdCRTgyNEQ2NENERjc4M0ZCMTU4RTU1Njc5NTVFN0Q3QjU4MEI0RkRGMEUxRDZERTkyNkIyQzhENDRFRTlDMDNGNjRDRg==&token=46f3730533cdb70f571cc6c588272307&timestamp=2024-10-25 21:07:37&tokens=
+            //
+            //
+            // MjA1NDIxQ0MyNzExNzhGNkRBQjk2QjQyNzg4QkI5MDI2MUMyRjE0NkIyMzk3MjhDRUVBNTM2Qzg1
+            // OTNCMzMwQzEzNTNDNjQyNjExQjM5NTZBQkQ1OUI3MTBEQzdBQTQ3"#)
+            .send().await?
+            .text().await?;
+        Ok(res)
+    }
+
+    pub async fn select_course_gx(&self, course: Value) -> Result<String> {
+        let c = course.clone();
+        let token = self.get_aam_token_key("wsxk.bykxk.jsp").await?;
+        let (key, nowtime) = self.get_aam_encrypt_key().await?;
+        let p = ElectiveCourseForm::new(course).encode()? + "&kcfw=zxggrx&items=&is_xjls=undefined&btnSubmit=%E6%8F%90%E4%BA%A4&kcmc=&t_skbh=&menucode_current=JW130415";
+        let params = enc_params(&key, &nowtime, &p);
+        eprintln!("{c}\n{token}\n{key}\n{nowtime}\n{p}\n{params}");
+
+        let mut headers = header::HeaderMap::new();
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36".parse().unwrap());
+        headers.insert("Host", (if self.inner { AAM_HOST } else { VPN_HOST }).parse().unwrap());
+        headers.insert("Accept-Language", "zh,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7".parse().unwrap());
+        headers.insert("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8".parse().unwrap());
+        headers.insert("Referer", ((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() + "/student/wsxk.bykxk.html?menucode=JW130415").parse().unwrap());
+        headers.insert("Accept", "text/plain, */*; q=0.01".parse().unwrap());
+        headers.insert("X-Requested-With", "XMLHttpRequest".parse().unwrap());
+        headers.insert("DNT", "1".parse().unwrap());
+        // headers.insert("Accept-Encoding", "gzip, deflate".parse().unwrap());
+        headers.insert("Origin", (if self.inner { INNER_AAM } else { INTER_AAM }).to_string().parse().unwrap());
+        headers.insert("Proxy-Connection", "keep-alive".parse().unwrap());
+
+        let res = self.session.post((if self.inner { INNER_AAM } else { INTER_AAM }).to_string() +
+            "/jw/common/saveElectiveCourseGxk.action")
+            .headers(headers)
+            .body(format!("{params}&timestamp={nowtime}&tokens={token}"))
+            //             .body(r#"params=MDAyOTk2MkFCNDQzMUVGRTBGMDMwNzMzRUMzMURGQTkyQTk5NDBFODExMUNEMjgwMDcyQTcwNkNCOEVCQzg2M0U5MjVERUY0OUFGRDYzODRBQ0IzNDI5NzIyM0VBMDc4MDVFQzY3NjJDMzBERDcwRUI3RjdFQzJFRjQzOERENzM2RkE5RjM0RkNGMUI4MDBCQUQyMUE5RTFDNjEyQUU3MTA1RUM2NzYyQzMwREQ3MEVEQkM0NTNCN0Q2NkU4QTEwMjFDRjhCODlDMUJBMkFBRkUzN0ZCOEJENUVEQ0RGQTk2QjMyNzBEQURDMzlDREQxNzFCNDkzMzRDRUVBRjUyMzhCRDg0NkRFOURDMjgzRUVBRkYyOUZBRTM1REVGRjU2NDFENzAxQzM3Nzc2MDk2NTFDMzE4RThDQUQyMDcxRjU4NkFDOEUzQkMyQTJCMDA1QjA2MTA4OTBFNUUzMDRFRkZERjJDODhGRkQ1QjE3Q0JFODlDMkZFRjk4NTAyOThDNjIzOUJFMDQ0RjZDNkYzQjg3MUQ0RDI5RDZFQUQ1MzE2MjM5QkUwNDRGNkM2RjNCRjM5RTBGQkY3MDA5N0RCNDRBOEFEODlCOTJDQTI0OUI2MDY1REQ0MjkyRjJFMTAwMURCMzk2Q0M2QzRGNTMwNTdFM0E4QTNFQUIyNzFCNjkyQ0QxMkFDRDZDQjRFMTJGMDJCRDdFMkMzQUQ1OEVEQUE4REU1NUY4QUE5M0M1RkIwODgyRjBGQ0JDMkFDRjIzMzhBOUVBQjhBNUJENzBBQ0UxREE4QkJEMDhEM0MxMkRCMTEzMEUxQzVGODZDQzdENEEyM0I3M0RGOTNBMjc0OTkyN0U1M0Q2NjA3NDkzOEQxQUI0QkY0QkI1OEE1RTNERUU5MTczMkQ4MEZGN0FBMDQ5QTcyRDU2RTMwRUNBRERBQzZDODAxQTJENDU4QkJENjU3NDc3QkUyOTBEQzk0Mjk5QkE4OTJBQTQwNEM5M0JDODc1QjU0N0NDNDJDNTkwOTY2NjUxRjVCMDc2QkM3MUE5MUE4MURDREZFMTEyNzhDMzY3M0E2RDEzMDFEREY2REEzREM5ODNGQjE3QUIyM0E3MzJBRkY5ODUzNUEyNUUyODEzNzNBQjM5RUQ1RjMwQTczMkFGRjk4NTM1QTI1RTYzMzBCMkVGRjAzRkZFNzZBMTRCRTg1NjQ3MUQzQTRFNTYwRDcxMjBCNkNDQTVDNkM0NkEyQjE2OTdCMUNFMjQyMjI4RUI5NzBGQ0VDQjU5QzE2RTk0MDI5MzBFNTRFOTVCODdGMjY5NDRFMjJGOUEzRTZDRDE1Nzk3NDdCRTgyNEQ2NENERjc4M0ZCMTU4RTU1Njc5NTVFN0Q3QjU4MEI0RkRGMEUxRDZERTkyNkIyQzhENDRFRTlDMDNGNjRDRg==&token=46f3730533cdb70f571cc6c588272307&timestamp=2024-10-25 21:07:37&tokens=
+            //
+            //
+            // MjA1NDIxQ0MyNzExNzhGNkRBQjk2QjQyNzg4QkI5MDI2MUMyRjE0NkIyMzk3MjhDRUVBNTM2Qzg1
+            // OTNCMzMwQzEzNTNDNjQyNjExQjM5NTZBQkQ1OUI3MTBEQzdBQTQ3"#)
+            .send().await?
+            .text().await?;
+        Ok(res)
+    }
+
     pub async fn init_card(&mut self) -> Result<()> {
         if let Some(ref mut info) = self.info {
             if info.get("card").is_none() {
@@ -812,6 +1096,71 @@ impl DcpSession {
         } else {
             Err(anyhow!("Cant open info dict!"))
         }
+    }
+
+
+    pub async fn init_tycg(&self) -> Result<bool> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36".parse().unwrap());
+        headers.insert("Host", (if self.inner { TY_HOST } else { VPN_HOST }).parse().unwrap());
+
+
+        let res = self.session.get(if self.inner { INNER_TY } else { INTER_TY })
+            .headers(headers)
+            .send().await?
+            .status().is_success()
+            ;
+
+        Ok(res)
+    }
+
+    pub async fn get_authcode(&self) -> Result<String> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8".parse().unwrap());
+        headers.insert("Host", (if self.inner { TY_HOST } else { VPN_HOST }).parse().unwrap());
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0".parse().unwrap());
+
+        let res = self.session.get((if self.inner { INNER_TY } else { INTER_TY }).to_string() + "/core/api/authcode")
+            .headers(headers)
+            .send().await?
+            .bytes().await?;
+
+        let img = Rec::compose_gif(Cursor::new(res))?;
+        let code = REC.get().unwrap().predict_str(&img)?;
+        Ok(code)
+    }
+
+    pub async fn ty_order(&self, proj: &str, datetime: &str, playground: &str, time: &str) -> Result<String> {
+        let mut headers = header::HeaderMap::new();
+        headers.insert("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8".parse().unwrap());
+        headers.insert("Host", (if self.inner { TY_HOST } else { VPN_HOST }).parse().unwrap());
+        headers.insert("Referer", ((if self.inner { INNER_TY } else { INTER_TY }).to_string() + "/www/yy/bg/cgyyDome").parse().unwrap());
+        headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0".parse().unwrap());
+        let mut res: Value;
+        let proj = TyList::from_str(proj)?;
+        let mut count = 0;
+
+        while
+        {
+            // let s = std::time::Instant::now();
+            let code = self.get_authcode().await?;
+            let data = proj.parse_request(&proj.get_data(playground, time)?, &code, datetime);
+            // eprintln!("[{datetime} {playground} {time}]: get code {:?}", s.elapsed());
+
+            res = self.session.post((if self.inner { INNER_TY } else { INTER_TY }).to_string() + "/www/tycg/yy/appOrder")
+                .headers(headers.clone())
+                .body(data)
+                .send().await?
+                .json().await?;
+            // eprintln!("[{datetime} {playground} {time}]: send order {:?}", s.elapsed());
+
+            res["message"].as_str().unwrap().contains("验证码")
+        } {
+            count += 1;
+            if count >= 3 { break; }
+        }
+
+        Ok(format!("[{datetime} {playground} {time}]: {}", res["message"].as_str().unwrap()))
     }
 
     // pub async fn get_card_info(&self) -> Result<f32> {
@@ -849,9 +1198,12 @@ impl DcpSession {
 #[cfg(test)]
 mod tests {
     use std::future::Future;
+    use std::sync::Arc;
     use regex::Regex;
     use super::*;
-    use tokio; // 使用 tokio 运行时
+    use tokio;
+    use crate::REC;
+    // 使用 tokio 运行时
 
 
     #[test]
@@ -865,7 +1217,7 @@ mod tests {
         let courses: Vec<Value> = serde_json::from_str(data).unwrap();
         let mut schedule_by_week: HashMap<u32, Vec<Value>> = HashMap::new();
 
-        let re = Regex::new(r"(\d+)(?:-(\d+))?周(?:\((单|双)\))? (\S)\[(\d+)-(\d+)\] (\S+)\((\d+)\)").unwrap();
+        let re = Regex::new(r"(\d+)(?:-(\d+))?周(?:\(([单双])\))? (\S)\[(\d+)-(\d+)] (\S+)\((\d+)\)").unwrap();
 
         let day_map = vec!["一", "二", "三", "四", "五", "六", "日"];
 
@@ -1120,6 +1472,39 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_select_course() -> Result<()> {
+        let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
+            Ok(s) => s,
+            Err(e) => panic!("{}", e.to_string())
+        };
+
+        s.init_aam().await.unwrap();
+        eprintln!("{}", s.select_course_gx(
+            json!({
+    "xktype": "2",
+    "xn": "2024",
+    "xq": "0",
+    "xh": "202161286408",
+    "nj": "2021",
+    "zydm": "BQ108",
+    "kcdm": "2310178582",
+    "kclb1": "05",
+    "kclb2": "A1",
+    "kclb3": "01",
+    "khfs": "01",
+    "skbjdm": "2310178582-01",
+    "skbzdm": "",
+    "xf": "1.0",
+    "kknj": "",
+    "kkzydm": ""
+})
+        ).await?);
+
+
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn test_get_cookie() -> Result<()> {
         let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
             Ok(s) => s,
@@ -1127,11 +1512,127 @@ mod tests {
         };
 
         s.init_aam().await.unwrap();
-        eprintln!("{:}",s.get_cookie().unwrap());
+        eprintln!("{:}", s.get_cookie().unwrap());
+        Ok(())
+    }
+    #[tokio::test]
+    async fn test_get_authcode() -> Result<()> {
+        REC.get_or_init(|| Rec::from_embed().unwrap());
+        let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
+            Ok(s) => s,
+            Err(e) => panic!("{}", e.to_string())
+        };
 
+        s.init_aam().await.unwrap();
+        eprintln!("{:}", s.get_authcode().await.unwrap());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_ty() -> Result<()> {
+        let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
+            Ok(s) => s,
+            Err(e) => panic!("{}", e.to_string())
+        };
+
+        s.init_aam().await.unwrap();
+        eprintln!("{:}", s.init_tycg().await.unwrap());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_order_ty() -> Result<()> {
+        REC.get_or_init(|| Rec::from_embed().unwrap());
+
+        let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
+            Ok(s) => s,
+            Err(e) => panic!("{}", e.to_string())
+        };
+
+
+        s.init_aam().await.unwrap();
+        eprintln!("{:}", s.init_tycg().await.unwrap());
+
+        let s = Arc::new(s);
+        let s1 = s.clone();
+        let s2 = s.clone();
+        let s3 = s.clone();
+
+        let a1 =  tokio::spawn(async move {
+            let t = std::time::Instant::now();
+            let res = s1.ty_order("ymq", "2024-10-29", "羽1", "12:00-13:00").await.unwrap();
+            eprintln!("{:?}", t.elapsed());
+            res
+        }).await?;
+        let a2 = tokio::spawn(async move {
+            let t = std::time::Instant::now();
+            let res = s2.ty_order("ymq", "2024-10-29", "羽2", "12:00-13:00").await.unwrap();
+            eprintln!("{:?}", t.elapsed());
+            res
+        }).await?;
+        let a3 =  tokio::spawn(async move {
+            let t = std::time::Instant::now();
+            let res = s3.ty_order("ymq", "2024-10-29", "羽3", "12:00-13:00").await.unwrap();
+            eprintln!("{:?}", t.elapsed());
+            res
+        }).await?;
+        eprintln!("{a1} {a2} {a3}");
+
+
+        // let results: Vec<_> = vec![
+        //     tokio::spawn(async move {
+        //         let t = std::time::Instant::now();
+        //         let res = s1.ty_order("ymq", "2024-10-29", "羽1", "12:00-13:00").await.unwrap();
+        //         eprintln!("{:?}", t.elapsed());
+        //         res
+        //     }),
+        //     tokio::spawn(async move {
+        //         let t = std::time::Instant::now();
+        //         let res = s2.ty_order("ymq", "2024-10-29", "羽2", "12:00-13:00").await.unwrap();
+        //         eprintln!("{:?}", t.elapsed());
+        //         res
+        //     }),
+        //     tokio::spawn(async move {
+        //         let t = std::time::Instant::now();
+        //         let res = s3.ty_order("ymq", "2024-10-29", "羽3", "12:00-13:00").await.unwrap();
+        //         eprintln!("{:?}", t.elapsed());
+        //         res
+        //     }),
+        // ];
+
+
+        // for result in results.into_iter() {
+        //     eprintln!("{}", result.await?);
+        // }
+        // eprintln!("{:}", s.ty_order("ymq", "2024-10-29", "羽1", "12:00-13:00").await.unwrap());
+        // eprintln!("{:}", s.ty_order("ppq", "2024-10-29", "乒1", "12:00-13:00").await.unwrap());
 
         Ok(())
     }
+
+    #[tokio::test]
+    async fn test_parse_request() -> Result<()> {
+        let data = TyList::YMQ.get_data("羽1", "12:00-13:00")?;
+        // 获取当前日期
+        let today = Local::now().naive_local();
+
+        // 计算明天的日期
+        let tomorrow = today + chrono::Duration::days(1);
+
+        // 格式化为 YYYY-MM-DD
+        let formatted_date = tomorrow.format("%Y-%m-%d").to_string();
+
+        eprintln!("{}", TyList::YMQ.parse_request(&data, "12345", &formatted_date));
+        // let mut s = match DcpSession::test_build("202111150036", "a13970549022").await {
+        //     Ok(s) => s,
+        //     Err(e) => panic!("{}", e.to_string())
+        // };
+        //
+        // s.init_aam().await.unwrap();
+        // eprintln!("{:}", s.init_tycg().await.unwrap());
+        Ok(())
+    }
+
 
     #[tokio::test]
     async fn test_card_init() {

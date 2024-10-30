@@ -126,7 +126,6 @@
     "notification:allow-request-permission",
     "notification:allow-check-permissions",
     "store:default",
-    "shell:default",
     {
       "identifier": "http:default",
       "allow": [
