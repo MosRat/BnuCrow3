@@ -53,7 +53,7 @@ onMounted(async () => {
   const userinfo = await store.get<{ username: string, password: string }>('userinfo')
   username.value = userinfo?.username ? userinfo.username : ""
   password.value = userinfo?.password ? userinfo.password : ""
-  if (userinfo !== null) {
+  if (userinfo) {
     await dcp_login()
   }
 })

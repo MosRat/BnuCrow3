@@ -1,7 +1,6 @@
 use tauri_plugin_http::reqwest;
 use tauri_plugin_http::reqwest::{Client, Proxy};
 use cookie_store::CookieStore;
-use log::{error, warn};
 use reqwest_cookie_store::CookieStoreMutex;
 use std::fs::{self, File};
 use std::io::{BufReader, Cursor, Write};
@@ -111,7 +110,7 @@ impl State {
                     anyhow::anyhow!("{}", e).context(context)
                 })?,
             Err(e) => {
-                warn!(
+                eprintln!(
                     "open {} failed. error: {}, use default empty cookie store",
                     cookie_store_path.display(),
                     e
@@ -135,7 +134,7 @@ impl State {
         {
             Ok(f) => f,
             Err(e) => {
-                error!(
+                eprintln!(
                     "open {} for write failed. error: {}",
                     self.cookie_store_path.display(),
                     e
@@ -146,7 +145,7 @@ impl State {
 
         let store = self.cookie_store.lock().unwrap();
         if let Err(e) = store.save_incl_expired_and_nonpersistent_json(&mut file) {
-            error!(
+            eprintln!(
                 "save cookies to path {} failed. error: {}",
                 self.cookie_store_path.display(),
                 e

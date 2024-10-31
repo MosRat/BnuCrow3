@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    bnu_crow_lib::run()
+    bnu_crow3_lib::run()
 }

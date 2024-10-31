@@ -1,17 +1,13 @@
-// @ts-ignore
-
 import {defineConfig} from "vite";
 import vue from "@vitejs/plugin-vue";
 import {resolve} from 'path'
 
-// ts-expect-error process is a nodejs global
-// const host = process.env.TAURI_DEV_HOST;
-const serverHost = "0.0.0.0";
-const devHost = "192.168.137.1";
+// @ts-expect-error process is a nodejs global
+const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-    build:{
+    build: {
         target: ['es2022', 'chrome89', 'firefox89', 'safari15', 'edge89']
     },
     resolve: {
@@ -22,7 +18,6 @@ export default defineConfig(async () => ({
             '@lib': resolve(__dirname, "./src/libs"),
         }
     },
-
     plugins: [vue()],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
@@ -33,11 +28,11 @@ export default defineConfig(async () => ({
     server: {
         port: 1420,
         strictPort: true,
-        host: serverHost || false,
-        hmr: devHost
+        host: host || false,
+        hmr: host
             ? {
                 protocol: "ws",
-                host: devHost,
+                host,
                 port: 1421,
             }
             : undefined,

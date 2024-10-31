@@ -1,28 +1,27 @@
 [package]
 name = "bnu-crow3"
-version = "0.1.1"
-description = "A app for Bnuer"
-authors = ["MosRat"]
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "bnu_crow_lib"
-crate-type = ["lib", "cdylib", "staticlib"]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "bnu_crow3_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-rc", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.6", features = ["protocol-asset"] }
+tauri = { version = "2", features = [] }
 tauri-plugin-shell = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri-plugin-notification = "2"
-tauri-plugin-store = "2"
-tauri-plugin-http = "2"
-log = "0.4.22"
 cookie_store = "0.21.0"
 reqwest_cookie_store = "0.8.0"
 anyhow = "1.0.87"
@@ -30,15 +29,19 @@ base64 = "0.22.1"
 once_cell = "1.19.0"
 tokio = "1.40.0"
 regex = "1.10.6"
-chrono = "0.4.38"
 serde-xml-rs = "0.5"
-jni = "0.21.0"
-time = "0.3.36"
 md5 = "0.7.0"
-serde_urlencoded = "0.7.1"
-url = "2.5.2"
+tauri-plugin-http = "2"
+tauri-plugin-store = "2"
 dddd_ocr = { git = "https://github.com/MosRat/dddd_ocr_rs" }
 image = { version = "0.25.4", features = ["gif", "png", ], default-features = false }
+url = "2.5.2"
+serde_urlencoded = "0.7.1"
+chrono = "0.4.38"
+
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21.0"
 
 
 [profile.dev]
@@ -51,4 +54,3 @@ lto = true # Enables link-time-optimizations.
 opt-level = "s" # Prioritizes small binary size. Use `3` if you prefer speed.
 panic = "abort" # Higher performance by disabling panic handlers.
 strip = true # Ensures debug symbols are removed.
-

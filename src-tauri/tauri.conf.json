@@ -1,38 +1,24 @@
 {
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "bnu-crow3",
   "version": "0.1.1",
   "identifier": "com.bnucrow3.app",
-  "$schema": "gen/schemas/config.schema.json",
   "build": {
     "beforeDevCommand": "bun run dev",
-    "devUrl": "http://192.168.137.1:1420",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "BnuCrow3",
-        "label": "main",
-        "decorations": false,
-        "transparent": true,
-        "theme": "Light"
+        "title": "bnu-crow3",
+        "width": 800,
+        "height": 600
       }
     ],
     "security": {
-      "csp": {
-        "default-src": "'self' customprotocol: asset:",
-        "connect-src": "ipc: http://ipc.localhost",
-        "font-src": ["https://fonts.gstatic.com"],
-        "img-src": "'self' asset: http://asset.localhost blob: data:",
-        "style-src": "'unsafe-inline' 'self' https://fonts.googleapis.com"
-      },
-      "assetProtocol": {
-        "enable" : true,
-        "scope": {
-          "allow": ["*","**"]
-        }
-      }
+      "csp": null
     }
   },
   "bundle": {
