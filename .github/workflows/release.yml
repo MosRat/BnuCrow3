@@ -50,6 +50,9 @@ jobs:
           wget https://github.com/MosRat/BnuCrow3/releases/download/deps/onnxruntime-aarch64-android.zip -O onnxruntime.zip
           unzip onnxruntime.zip -d onnxruntime
           echo "ORT_LIB_LOCATION=$(pwd)/onnxruntime" >> $GITHUB_ENV
+
+      - name: Set NDK_HOME
+        run: echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.0.12433566" >> $GITHUB_ENV
           
       - name: Set environment variables
         run: |
