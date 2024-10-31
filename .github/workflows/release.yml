@@ -50,13 +50,6 @@ jobs:
           wget https://github.com/MosRat/BnuCrow3/releases/download/deps/onnxruntime-aarch64-android.zip -O onnxruntime.zip
           unzip onnxruntime.zip -d onnxruntime
           echo "ORT_LIB_LOCATION=$(pwd)/onnxruntime" >> $GITHUB_ENV
-          echo $ORT_LIB_LOCATION
-          cd $ORT_LIB_LOCATION && ls
-
-      - run: |
-          echo "ort:"
-          echo $ORT_LIB_LOCATION
-          ls -r
 
       - name: Set NDK_HOME
         run: echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.0.12433566" >> $GITHUB_ENV
@@ -86,7 +79,7 @@ jobs:
       - name: Extract app version
         id: extract_version
         run: |
-          VERSION=$(jq -r '.version' tauri.conf.json)
+          VERSION=$(jq -r '.version' src-tauri/tauri.conf.json)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Upload APK to release
