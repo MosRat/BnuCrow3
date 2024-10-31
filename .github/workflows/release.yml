@@ -87,7 +87,7 @@ jobs:
         with:
           files: src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
           tag_name: app-v${{ env.VERSION }}-${{ steps.generate_tag_unix.outputs.TAG }}
-          release_name: 'App v${{ env.VERSION }}'
+          name: 'App v${{ env.VERSION }}'
           body: 'See the assets to download this version and install.'
           draft: true
         env:
