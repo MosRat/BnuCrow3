@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports, unused_mut, unused_variables)]
+#![allow(dead_code, unused_imports, unused_mut, unused_variables,non_snake_case)]
 mod session;
 mod encrypt;
 mod dcp;
