@@ -53,6 +53,11 @@ jobs:
           echo $ORT_LIB_LOCATION
           cd $ORT_LIB_LOCATION && ls
 
+      - run: |
+          echo "ort:"
+          echo $ORT_LIB_LOCATION
+          ls -r
+
       - name: Set NDK_HOME
         run: echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/28.0.12433566" >> $GITHUB_ENV
           
