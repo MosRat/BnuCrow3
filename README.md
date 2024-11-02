@@ -1,16 +1,73 @@
-# Tauri + Vue + TypeScript
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+<div align="center">
+<h1 > BNU Crow 3 </h1>
 
-## Recommended IDE Setup
+![License](https://img.shields.io/badge/license-MIT-blue)
+[![Tauri](https://img.shields.io/badge/Tauri-2.0.0-blue?logo=tauri)]()
+[![Vue.js](https://img.shields.io/badge/vue.js-v3-green?logo=vue.js)](https://github.com/vuejs/vue-next)
+[![Rust](https://img.shields.io/badge/-Rust-orange?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Android](https://img.shields.io/badge/android-supported-yellow)](https://www.android.com/)
+![Platform](https://img.shields.io/badge/platform-Android%20|%20iOS-orange)
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+<h3>English | <a href='./README_zh.md'>中文</a> </h3>
+</div>
 
-## Type Support For `.vue` Imports in TS
+Welcome to 北师小鸦3, a dedicated campus life assistant app designed for students of Beijing Normal University (BNU). This app builds upon the legacy of its predecessor, [北师小鸦2](https://github.com/BNU-Crow/BNU-Xiaoya), to provide an enhanced and seamless experience for BNU students.
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+## Features
+> Copied from 北师小鸦 🤣
+- **Seamless Login to 数字京师**: Enjoy higher success rates and a smoother login experience, even during peak times, thanks to our robust backend.
+- **Effortless Grade and GPA Checking**: Quickly access your grades with multiple calculation methods and detailed credit modules.
+- **Convenient Exam Schedule Access**: Stay prepared with up-to-date exam arrangements and countdown reminders synced with the academic office.
+- **Quick 京师体育 Access**: Easily track your sports activities and attendance.
+- **Efficient Classroom Availability**: Save time by finding free classrooms effortlessly.
+- **Comprehensive Library Services**: Access library resources and research papers with ease.
+- **New Student Tips**: Includes academic calendar, campus map, and essential contact information for newcomers.
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+## Upcoming Features
+
+- **Automatic Course Enrollment**: Inspired by [BNUCourseGetter](https://github.com/LeafYeeXYZ/BNUCourseGetter).
+- **Automated Sports Facility Booking**: Idea from [this repository](https://github.com/MosRat/BnuBadmintonBook)
+
+## Technical Details
+
+- **Frontend**: Built with [Vue 3](https://vuejs.org/).
+- **Core**: Developed using [Rust](https://www.rust-lang.org/).
+- **Platform**: Currently supports Android builds; iOS support planned (pending access to Mac, I'm planning to buy one).
+- **Bnu Web Api**:  See  <a href='./doc/api.md'>api.md</a>
+
+## Build
+
+To build BnuCrow3 for Android device, follow these steps in Windows device with [Tauri](https://tauri.app/start/) and [Rust](https://www.rust-lang.org/tools/install) installed:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/MosRat/BnuCrow3.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd BNUCrow3
+   ```
+3. Init project:
+   ```bash
+   pnpm install
+   tauri android init
+   ```
+4. Debug this app on an emulator or phone with (make sure adb is connected) :
+   ```bash
+   tauri android dev
+   ```
+   
+5. Build the project using tauri:
+   ```bash
+   tauri android build -t aarch64 --apk
+   ```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE_MIT) file for details.
+
+## Acknowledgments
+
+Special thanks to the original [北师小鸦2 team](https://github.com/BNU-Crow) and the contributors for their inspiration and foundational work.
